@@ -28,7 +28,7 @@ int main(int argc, char **argv)
         clientlen = sizeof(struct sockaddr_storage);
         connfd = Accept(listenfd, (SA *)&clientaddr, &clientlen);
         Getnameinfo((SA *)&clientaddr, clientlen, client_hostname, MAXLINE, client_port, MAXLINE, 0);
-        prinf("Connected to (%s:%s)\n", client_hostname, client_port);
+        printf("Connected to (%s:%s)\n", client_hostname, client_port);
 
         echo(connfd);
         Close(connfd);
@@ -55,7 +55,7 @@ void echo(int connfd)
     // } rio_t;
 
     while ((n = Rio_readlineb(&rio, buf, MAXLINE)) != 0) {
-        prinf("server received %d bytes\n", (int)n);
+        printf("server received %d bytes\n", (int)n);
         Rio_writen(connfd, buf, n);
     }
 }
