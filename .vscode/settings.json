@@ -1,5 +1,8 @@
 {
     "files.associations": {
-        "csapp.h": "c"
+        "csapp.h": "c",
+        "istream": "c",
+        "locale": "c",
+        "cstdio": "c"
     }
 }

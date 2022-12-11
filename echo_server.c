@@ -1,5 +1,42 @@
 #include "csapp.h"
 
+void echo(int connfd);
+
+int main(int argc, char **argv)
+{
+    int listenfd, connfd;
+    socklen_t clientlen;
+    /**
+     * protocol-independent
+     * 즉, 어떤 형태의 소켓 주소든 저장할 수 있을 정도로 크기가 충분히 크다.
+    */
+    struct sockaddr_storage clientaddr;
+    char client_hostname[MAXLINE], client_port[MAXLINE];
+
+    if (argc != 2) {
+        fprintf(stderr, "usage: %s <port>\n", argv[0]);
+        exit(0);
+    }
+
+    /**
+     * 내부적으로 getaddrinfo, socket, bind, listen을 실행하고
+     * listening socket을 반환한다.
+    */
+    listenfd = Open_listenfd(argv[1]);
+
+    while (1) {
+        clientlen = sizeof(struct sockaddr_storage);
+        connfd = Accept(listenfd, (SA *)&clientaddr, &clientlen);
+        Getnameinfo((SA *)&clientaddr, clientlen, client_hostname, MAXLINE, client_port, MAXLINE, 0);
+        prinf("Connected to (%s:%s)\n", client_hostname, client_port);
+
+        echo(connfd);
+        Close(connfd);
+    }
+
+    exit(0);
+}
+
 void echo(int connfd)
 {
     size_t n;
