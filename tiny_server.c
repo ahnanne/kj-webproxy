@@ -7,12 +7,60 @@
 /**
  * 함수 선언
 */
+int parse_uri(char *uri, char *filename, char *cgiargs);
 void get_filetype(char *filename, char *filetype);
+void serve_static(int fd, char *filename, int filesize);
 void serve_dynamic(int fd, char *filename, char *cgiargs);
 
 int main(int argc, char **argv)
 {
     // TODO:
+}
+
+int parse_uri(char *uri, char *filename, char *cgiargs)
+{
+    char *ptr;
+
+    /* 정적 컨텐츠에 대한 요청일 경우 */
+    if (!strstr(uri, "cgi-bin")) {
+        strcpy(cgiargs, "");
+
+        /**
+         * 상대경로로 변환하는 작업
+        */
+        strcpy(filename, ".");
+        strcat(filename, uri);
+
+        /**
+         * uri가 '/'로 끝난다면?
+         * (이때 이 '/'는 클라이언트 단에서 붙여서 보내준 것)
+        */
+        if (uri[strlen(uri) - 1] == '/') {
+            // default filename은 ./home.html이라고 가정한 상태
+            strcat(filename, "home.html");
+        }
+
+        return 1;
+    }
+
+    /* 동적 컨텐츠에 대한 요청일 경우 */
+    else {
+        ptr = index(uri, '?');
+
+        // 쿼리 스트링이 존재한다면
+        if (ptr) {
+            strcpy(cgiargs, ptr + 1);
+            *ptr = '\0';
+        }
+        else {
+            strcpy(cgiargs, "");
+        }
+
+        strcpy(filename, ".");
+        strcat(filename, uri);
+
+        return 0;
+    }
 }
 
 /**
