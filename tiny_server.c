@@ -17,7 +17,34 @@ void serve_dynamic(int fd, char *filename, char *cgiargs);
 
 int main(int argc, char **argv)
 {
-    // TODO:
+    int listenfd, connfd;
+    char hostname[MAXLINE], port[MAXLINE];
+    socklen_t clientlen;
+    struct sockaddr_storage clientaddr;
+
+    /**
+     * command line 인자 확인하기
+    */
+    if (argc != 2) {
+        fprintf(stderr, "usage: %s <port>\n", argv[0]);
+        exit(1);
+    }
+
+    listenfd = Open_listenfd(argv[1]);
+
+    /**
+     * iterative server로서 한번에 하나의 transaction만 처리 가능
+    */
+    while (1) {
+        clientlen = sizeof(clientaddr);
+        connfd = Accept(listenfd, (SA *)&clientaddr, &clientlen);
+
+        Getnameinfo((SA *)&clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE, 0);
+        printf("Accepted connection from (%s:%s)\n", hostname, port);
+
+        doit(connfd);
+        Close(connfd);
+    }
 }
 
 /**
