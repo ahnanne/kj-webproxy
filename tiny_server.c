@@ -104,6 +104,62 @@ void doit(int fd)
 }
 
 /**
+ * 한번에 하나의 HTTP transaction을 처리하는 함수
+*/
+void doit(int fd)
+{
+    int is_static;
+    struct stat sbuf;
+    char buf[MAXLINE], method[MAXLINE], uri[MAXLINE], version[MAXLINE];
+    char filename[MAXLINE], cgiargs[MAXLINE];
+    rio_t rio;
+
+    /**
+     * 요청 라인 및 헤더를 읽어들인다.
+    */
+    Rio_readinitb(&rio, fd);
+    Rio_readlineb(&rio, buf, MAXLINE);
+    printf("Request headers:\n");
+    printf("%s", buf);
+    sscanf(buf, "%s %s %s", method, uri, version);
+
+    if (strcasecmp(method, "GET" != 0)) {
+        clienterror(fd, method, "501", "Not implemented", "TINY does not implement this method");
+        return;
+    }
+
+    read_requesthdrs(&rio);
+
+    /**
+     * GET 요청임이 보장된 상태에서 URI 파싱
+    */
+    is_static = parse_uri(uri, filename, cgiargs);
+
+    // 디스크 상에 파일이 존재하지 않을 경우 에러 보내고 함수 종료
+    if (stat(filename, &sbuf) < 0) {
+        clienterror(fd, filename, "404", "Not found", "TINY couldn't find this file");
+        return;
+    }
+
+    if (is_static) {
+        if (!(S_ISREG(sbuf.st_mode)) || !(S_IRUSR & sbuf.st_mode)) {
+            clienterror(fd, filename, "403", "Forbidden", "TINY couldn't reach the file");
+            return;
+        }
+
+        serve_static(fd, filename, sbuf.st_size);
+    }
+    else {
+        if (!(S_ISREG(sbuf.st_mode)) || !(S_IRUSR & sbuf.st_mode)) {
+            clienterror(fd, filename, "403", "Forbidden", "TINY couldn't run the CGI program");
+            return;
+        }
+
+        serve_dynamic(fd, filename, cgiargs);
+    }
+}
+
+/**
  * 클라이언트에게 에러 메시지를 보내는 함수
 */
 void clienterror(int fd, char *cause, char *errnum, char *shortmsg, char *longmsg)
