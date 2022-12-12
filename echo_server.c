@@ -24,15 +24,17 @@ int main(int argc, char **argv)
     */
     listenfd = Open_listenfd(argv[1]);
 
-    clientlen = sizeof(struct sockaddr_storage);
-    connfd = Accept(listenfd, (SA *)&clientaddr, &clientlen);
-    Getnameinfo((SA *)&clientaddr, clientlen, client_hostname, MAXLINE, client_port, MAXLINE, 0);
-    printf("Connected to (%s:%s)\n", client_hostname, client_port);
+    /* ! 클라이언트 쪽에서 연결을 종료하더라도, 서버는 계속 켜져있어야 한다. */
+    while (1) {
+    	clientlen = sizeof(struct sockaddr_storage);
+    	connfd = Accept(listenfd, (SA *)&clientaddr, &clientlen);
+    	Getnameinfo((SA *)&clientaddr, clientlen, client_hostname, MAXLINE, client_port, MAXLINE, 0);
+    	printf("Connected to (%s:%s)\n", client_hostname, client_port);
 
-    echo(connfd);
-    Close(connfd);
-    printf("클라이언트 프로세스(%s:%s)에서 연결을 종료했습니다.\n", client_hostname, client_port);
-
+    	echo(connfd);
+    	Close(connfd);
+    	printf("클라이언트 프로세스(%s:%s)에서 연결을 종료했습니다.\n", client_hostname, client_port);
+    }
     exit(0);
 }
 
