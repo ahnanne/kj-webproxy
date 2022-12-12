@@ -67,7 +67,7 @@ void doit(int fd)
     printf("%s", buf);
     sscanf(buf, "%s %s %s", method, uri, version);
 
-    if (strcasecmp(method, "GET" != 0)) {
+    if (strcasecmp(method, "GET") != 0) {
         clienterror(fd, method, "501", "Not implemented", "TINY does not implement this method");
         return;
     }
