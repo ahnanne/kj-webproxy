@@ -7,6 +7,7 @@
 /**
  * 함수 선언
 */
+void clienterror(int fd, char *cause, char *errnum, char *shortmsg, char *longmsg);
 void read_requesthdrs(rio_t *rp);
 int parse_uri(char *uri, char *filename, char *cgiargs);
 void get_filetype(char *filename, char *filetype);
@@ -18,6 +19,37 @@ int main(int argc, char **argv)
     // TODO:
 }
 
+/**
+ * 클라이언트에게 에러 메시지를 보내는 함수
+*/
+void clienterror(int fd, char *cause, char *errnum, char *shortmsg, char *longmsg)
+{
+    char buf[MAXLINE], body[MAXBUF];
+
+    /**
+     * HTTP res body 생성
+    */
+    sprintf(body, "<html><title>Tiny Error</title>");
+    sprintf(body, "%s<body bgcolor=""fafafa"">\r\n", body);
+    sprintf(body, "%s%s: %s\r\n", body, errnum, shortmsg);
+    sprintf(body, "%s<p>%s: %s\r\n", body, longmsg, cause);
+    sprintf(body, "%s<hr><em>The Tiny Web server</em>\r\n", body);
+
+    /**
+    * HTTP res 출력
+   */
+    sprintf(buf, "HTTP/1.0 %s %s\r\n", errnum, shortmsg);
+    Rio_writen(fd, buf, strlen(buf));
+    sprintf(buf, "Content-type: text/html\r\n");
+    Rio_writen(fd, buf, strlen(buf));
+    sprintf(buf, "Content-length: %d\r\n\r\n", (int)strlen(body));
+    Rio_writen(fd, buf, strlen(buf));
+    Rio_writen(fd, body, strlen(body));
+}
+
+/**
+ * request header를 읽는 함수
+*/
 void read_requesthdrs(rio_t *rp)
 {
     char buf[MAXLINE];
@@ -30,6 +62,10 @@ void read_requesthdrs(rio_t *rp)
     }
 }
 
+/**
+ * 정적 컨텐츠와 동적 컨텐츠 중 어느 것을 제공해야 하는지 판별하기 위해
+ * HTTP URI를 분석하는 함수
+*/
 int parse_uri(char *uri, char *filename, char *cgiargs)
 {
     char *ptr;
