@@ -4,10 +4,51 @@
 */
 #include "csapp.h"
 
+/**
+ * 함수 선언
+*/
+void get_filetype(char *filename, char *filetype);
+void serve_dynamic(int fd, char *filename, char *cgiargs);
+
 int main(int argc, char **argv)
 {
     // TODO:
 }
+
+/**
+ * 밑에서 등장할 serve_static에 대한 헬퍼 함수:
+ * 파일 이름으로부터 파일 유형을 알아낸다.
+*/
+void get_filetype(char *filename, char *filetype)
+{
+    char *p;
+    char extension[10];
+
+    p = strchr(filename, '.');
+    strcpy(extension, p);
+
+    if (extension == ".html") {
+        strcpy(filetype, "text/html");
+    }
+    else if (extension == ".gif") {
+        strcpy(filetype, "image/gif");
+    }
+    else if (extension == ".png") {
+        strcpy(filetype, "image/png");
+    }
+    else if (extension == ".jpg") {
+        strcpy(filetype, "image/jpeg");
+    }
+    else {
+        strcpy(filetype, "text/plain");
+    }
+}
+
+/**
+ * 정적 컨텐츠를 클라이언트에게 제공한다.
+ * 서버의 디스크에서 파일을 가져요고
+ * 이것을 클라이언트에게 돌려주는 방식으로 처리한다.
+*/
 
 /**
  * 동적 컨텐츠를 클라이언트에게 제공한다.
