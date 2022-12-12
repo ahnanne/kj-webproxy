@@ -21,6 +21,7 @@ int main(int argc, char **argv)
         Rio_writen(clientfd, buf, strlen(buf));
         Rio_readlineb(&rio, buf, MAXLINE);
         Fputs(buf, stdout);
+        printf("[도움말]서버(%s:%s)와의 연결을 종료하시려면 ctrl + d를 눌러주세요.\n", host, port);
     }
 
     Close(clientfd);
