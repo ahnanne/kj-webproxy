@@ -7,6 +7,7 @@
 /**
  * 함수 선언
 */
+void read_requesthdrs(rio_t *rp);
 int parse_uri(char *uri, char *filename, char *cgiargs);
 void get_filetype(char *filename, char *filetype);
 void serve_static(int fd, char *filename, int filesize);
@@ -15,6 +16,18 @@ void serve_dynamic(int fd, char *filename, char *cgiargs);
 int main(int argc, char **argv)
 {
     // TODO:
+}
+
+void read_requesthdrs(rio_t *rp)
+{
+    char buf[MAXLINE];
+
+    Rio_readlineb(rp, buf, MAXLINE);
+
+    while (strcmp(buf, "\r\n")) {
+        Rio_readlineb(rp, buf, MAXLINE);
+        printf("%s", buf);
+    }
 }
 
 int parse_uri(char *uri, char *filename, char *cgiargs)
