@@ -49,6 +49,45 @@ void get_filetype(char *filename, char *filetype)
  * 서버의 디스크에서 파일을 가져요고
  * 이것을 클라이언트에게 돌려주는 방식으로 처리한다.
 */
+void serve_static(int fd, char *filename, int filesize)
+{
+    int srcfd;
+    char *srcp, filetype[MAXLINE], buf[MAXLINE];
+
+    // 요청 파일 확장자 알아내기
+    get_filetype(filename, filetype);
+
+    /**
+     * 우선은 클라이언트 쪽에 성공을 알리는 응답 라인을, 서버 헤더와 함께 보낸다.
+    */
+    sprintf(buf, "HTTP/1.0 200 OK\r\n");
+    sprintf(buf, "%sServer: Tiny Web Server\r\n", buf);
+    sprintf(buf, "%sConnection: close\r\n", buf);
+    sprintf(buf, "%sContent-length: %d\r\n", buf, filesize);
+    sprintf(buf, "%sContent-type: %s\r\n\r\n", buf, filetype);
+
+    Rio_writen(fd, buf, strlen(buf));
+    printf("Response headers:\n");
+    printf("%s", buf);
+
+    /**
+     * 클라이언트에게 res body 전송
+    */
+
+    // opens filename and gets its descriptor
+    srcfd = Open(filename, O_RDONLY, 0);
+    // 요청 파일을 가상 메모리 영역에 매핑
+    srcp = Mmap(0, filesize, PROT_READ, MAP_PRIVATE, srcfd, 0);
+
+    // 매핑 완료해서 더 이상 필요 없으니 메모리 누수 방지를 위해 파일 닫기
+    Close(srcfd);
+
+    // 실질적으로 클라이언트에게 파일을 전송하는 부분
+    Rio_writen(fd, srcp, filesize);
+
+    // free 동적 할당 영역
+    Munmap(srcp, filesize);
+}
 
 /**
  * 동적 컨텐츠를 클라이언트에게 제공한다.
