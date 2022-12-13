@@ -1,0 +1,14 @@
+[0;1;32m●[0m apache2.service - The Apache HTTP Server
+   Loaded: loaded (/lib/systemd/system/apache2.service; enabled; vendor preset: enabled)
+  Drop-In: /lib/systemd/system/apache2.service.d
+           └─apache2-systemd.conf
+   Active: [0;1;32mactive (running)[0m since Tue 2022-12-13 06:15:56 UTC; 2h 19min ago
+ Main PID: 13111 (apache2)
+    Tasks: 55 (limit: 1134)
+   CGroup: /system.slice/apache2.service
+           ├─13111 /usr/sbin/apache2 -k start
+           ├─13114 /usr/sbin/apache2 -k start
+           └─13115 /usr/sbin/apache2 -k start
+
+Dec 13 06:15:56 ip-172-31-7-144 systemd[1]: Starting The Apache HTTP Server...
+Dec 13 06:15:56 ip-172-31-7-144 systemd[1]: Started The Apache HTTP Server.
