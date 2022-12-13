@@ -86,12 +86,14 @@ void doit(int fd)
     }
 
     if (is_static) {
+        // printf("(S_ISREG(sbuf.st_mode)) = %d\n", (S_ISREG(sbuf.st_mode))); // 1
+        // printf("(S_IRUSR & sbuf.st_mode) = %d\n", (S_IRUSR & sbuf.st_mode)); // 256
         if (!(S_ISREG(sbuf.st_mode)) || !(S_IRUSR & sbuf.st_mode)) {
             clienterror(fd, filename, "403", "Forbidden", "TINY couldn't reach the file");
             return;
         }
 
-        serve_static(fd, filename, sbuf.st_size);
+        serve_static(fd, filename, (int)sbuf.st_size);
     }
     else {
         if (!(S_ISREG(sbuf.st_mode)) || !(S_IRUSR & sbuf.st_mode)) {
@@ -203,7 +205,7 @@ int parse_uri(char *uri, char *filename, char *cgiargs)
 void get_filetype(char *filename, char *filetype)
 {
     char *p;
-    char extension[10];
+    char extension[MAXLINE];
 
     p = strchr(filename, '.');
     strcpy(extension, p);
@@ -233,7 +235,7 @@ void get_filetype(char *filename, char *filetype)
 void serve_static(int fd, char *filename, int filesize)
 {
     int srcfd;
-    char *srcp, filetype[MAXLINE], buf[MAXLINE];
+    char *srcp, filetype[MAXLINE], buf[MAXBUF];
 
     // 요청 파일 확장자 알아내기
     get_filetype(filename, filetype);
