@@ -31,7 +31,7 @@ int main(void) {
   }
 
   /**
-   * res body 생성하기
+   * res body
   */
   sprintf(content, "QUERY_STRING=%s", buf);
   sprintf(content, "%s이것은 response body입니다..", content);
@@ -44,11 +44,15 @@ int main(void) {
   printf("Connection: close\r\n");
   printf("Content-length: %d\r\n", (int)strlen(content));
   printf("Content-type: text/html; charset=utf-8\r\n\r\n");
-  printf("%s", content); // 앞서 생성한 res body 출력
+  // 앞서 생성한 res body 출력 (HEAD method일 경우에는 스킵)
+  if (strcasecmp(getenv("METHOD"), "HEAD")) {
+    printf("%s", content);
+  }
 
   /**
    * buffered stream을 flush한다.
-   * 즉, 누적된 모든 문자를 파일로 전송한다.
+   * 즉, 누적된 모든 문자를 파일로 전송하며 output buffer를 비운다.
+   * 참고 - https://www.geeksforgeeks.org/use-fflushstdin-c/
   */
   fflush(stdout);
 

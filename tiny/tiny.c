@@ -12,8 +12,8 @@ void clienterror(int fd, char *cause, char *errnum, char *shortmsg, char *longms
 void read_requesthdrs(rio_t *rp);
 int parse_uri(char *uri, char *filename, char *cgiargs);
 void get_filetype(char *filename, char *filetype);
-void serve_static(int fd, char *filename, int filesize);
-void serve_dynamic(int fd, char *filename, char *cgiargs);
+void serve_static(int fd, char *filename, int filesize, char *method);
+void serve_dynamic(int fd, char *filename, char *cgiargs, char *method);
 
 int main(int argc, char **argv)
 {
@@ -67,7 +67,7 @@ void doit(int fd)
     printf("%s", buf);
     sscanf(buf, "%s %s %s", method, uri, version);
 
-    if (strcasecmp(method, "GET") != 0) {
+    if (!(strcasecmp(method, "GET") == 0 || strcasecmp(method, "HEAD") == 0)) {
         clienterror(fd, method, "501", "Not implemented", "TINY does not implement this method");
         return;
     }
@@ -93,7 +93,7 @@ void doit(int fd)
             return;
         }
 
-        serve_static(fd, filename, (int)sbuf.st_size);
+        serve_static(fd, filename, (int)sbuf.st_size, method);
     }
     else {
         if (!(S_ISREG(sbuf.st_mode)) || !(S_IRUSR & sbuf.st_mode)) {
@@ -101,7 +101,7 @@ void doit(int fd)
             return;
         }
 
-        serve_dynamic(fd, filename, cgiargs);
+        serve_dynamic(fd, filename, cgiargs, method);
     }
 }
 
@@ -235,7 +235,7 @@ void get_filetype(char *filename, char *filetype)
  * 서버의 디스크에서 파일을 가져요고
  * 이것을 클라이언트에게 돌려주는 방식으로 처리한다.
 */
-void serve_static(int fd, char *filename, int filesize)
+void serve_static(int fd, char *filename, int filesize, char *method)
 {
     int srcfd;
     char *srcp, filetype[MAXLINE], buf[MAXBUF];
@@ -255,6 +255,10 @@ void serve_static(int fd, char *filename, int filesize)
     Rio_writen(fd, buf, strlen(buf));
     printf("Response headers:\n");
     printf("%s", buf);
+
+    if (!strcasecmp(method, "HEAD")) {
+        return;
+    }
 
     /**
      * 클라이언트에게 res body 전송
@@ -280,7 +284,7 @@ void serve_static(int fd, char *filename, int filesize)
  * 자식 프로세스의 컨텍스트에서 CGI 프로그램을 로드하고 실행하며
  * 그 출력을 클라이언트로 리턴하여 처리한다.
 */
-void serve_dynamic(int fd, char *filename, char *cgiargs)
+void serve_dynamic(int fd, char *filename, char *cgiargs, char *method)
 {
     char buf[MAXLINE], *emptylist[] = { NULL };
 
@@ -298,6 +302,7 @@ void serve_dynamic(int fd, char *filename, char *cgiargs)
     if (Fork() == 0) {
         // setenv — 환경변수를 추가하거나 수정한다.
         setenv("QUERY_STRING", cgiargs, 1);
+        setenv("METHOD", method, 1);
 
         // dup2 - duplicate an open file descriptor
         // redirect stdout to client
