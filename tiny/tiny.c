@@ -210,16 +210,16 @@ void get_filetype(char *filename, char *filetype)
     p = strchr(filename, '.');
     strcpy(extension, p);
 
-    if (extension == ".html") {
+    if (strcmp(extension, ".html")) {
         strcpy(filetype, "text/html");
     }
-    else if (extension == ".gif") {
+    else if (strcmp(extension, ".gif")) {
         strcpy(filetype, "image/gif");
     }
-    else if (extension == ".png") {
+    else if (strcmp(extension, ".png")) {
         strcpy(filetype, "image/png");
     }
-    else if (extension == ".jpg") {
+    else if (strcmp(extension, ".jpg")) {
         strcpy(filetype, "image/jpeg");
     }
     else {
