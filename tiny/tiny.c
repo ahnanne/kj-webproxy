@@ -30,7 +30,7 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    listenfd = Open_listenfd("8080");
+    listenfd = Open_listenfd(argv[1]);
 
     /**
      * iterative server로서 한번에 하나의 transaction만 처리 가능
