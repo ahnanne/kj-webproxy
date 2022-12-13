@@ -222,6 +222,9 @@ void get_filetype(char *filename, char *filetype)
     else if (strcmp(extension, ".jpg")) {
         strcpy(filetype, "image/jpeg");
     }
+    else if (strcmp(extension, ".mp4")) {
+        strcpy(filetype, "video/mp4");
+    }
     else {
         strcpy(filetype, "text/plain");
     }
