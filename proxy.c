@@ -10,7 +10,7 @@
 static const char *endof_hdr = "\r\n";
 
 static const char *connection_key = "Connection";
-static const *user_agent_key = "User-Agent";
+static const char *user_agent_key = "User-Agent";
 static const char *proxy_connection_key = "Proxy-Connection";
 static const char *host_key = "Host";
 
@@ -106,7 +106,7 @@ void doit(int connfd)
   size_t n;
 
   while (n = rio_readlineb(&server_rio, buf, MAXLINE)) {
-    printf("proxy received %d bytes, then send\n", n);
+    printf("proxy received %ld bytes, then send\n", n);
     Rio_writen(connfd, buf, n);
   }
 
@@ -165,7 +165,7 @@ void build_http_header(char *http_header, char *hostname, char *path, int port, 
 inline int connect_endserver(char *hostname, int port)
 {
   // atoi와 달리 itoa는 비표준이므로 다음과 같이 직접 변환해야 함.
-  char *port_str[MAXLINE];
+  char port_str[MAXLINE];
   sprintf(port_str, "%d", port);
 
   return Open_clientfd(hostname, port_str);
