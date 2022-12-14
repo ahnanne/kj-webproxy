@@ -82,7 +82,7 @@ void doit(int connfd)
 
   // 우선은 GET 요청만 처리하기로 함.
   if (strcasecmp(method, "GET")) {
-    printf("Proxy does not implement the method.");
+    printf("Proxy does not implement the method.\n");
     return;
   }
 
@@ -176,31 +176,38 @@ inline int connect_endserver(char *hostname, int port)
 */
 void parse_uri(char *uri, char *hostname, char *path, int *port)
 {
-  *port = 80; // *
+  // 포트번호가 누락되어 있을 경우에 대비하여 디폴트 포트번호 지정
+  // ! 인바운드 규칙으로 허용해 둔 포트번호여야 함.
+  // (클라이언트가 포트번호를 명시한 경우에는 아래 case 3에서 해당 포트번호로 덮어씌워짐.)
+  *port = "57143";
 
   // strstr()으로 부분 문자열 찾아서 해당 문자열의 시작 주소를 가리키는 포인터 정의
   // (부분 문자열이 없다면 NULL을 반환)
   // ? https://man7.org/linux/man-pages/man3/strstr.3.html
-  char *position1 = strstr(uri, "//");
-  position1 = position1 == NULL ? uri : position1 + 2;
+  char *position1 = strstr(uri, "//"); // http://어쩌고 에서 "//" 요거
+  position1 = position1 == NULL ? uri : position1 + 2; // IP 시작 위치
 
-  char *position2 = strstr(position1, ":");
+  char *position2 = strstr(position1, ":"); // ":포트번호" 시작 위치
+
+  // printf("uri: %s\n", uri);
+  // uri: http://13.124.89.247:57143/cgi-bin/adder?123&456
 
   if (position2 == NULL) {
     position2 = strstr(position1, "/");
 
-    if (position2 == NULL) {
+    if (position2 == NULL) { /* case 1 */
       sscanf(position1, "%s", hostname);
     }
-    else {
-      *position2 = "\0";
+    else { /* case 2 */
+      *position2 = '\0';
       sscanf(position1, "%s", hostname);
 
       *position2 = '/';
       sscanf(position2, "%s", path);
     }
   }
-  else {
+  /* case 3 */
+  else { // 프로토콜과 포트번호가 모두 명시되어 있을 경우
     *position2 = '\0';
     sscanf(position1, "%s", hostname);
     sscanf(position2 + 1, "%d%s", port, path);
