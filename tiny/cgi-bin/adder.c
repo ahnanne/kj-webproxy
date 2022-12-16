@@ -26,8 +26,10 @@ int main(void) {
     p = strchr(buf, '&');
     *p = '\0';
 
-    strcpy(arg1, buf + 3);
-    strcpy(arg2, p + 4);
+    strcpy(arg1, buf);
+    strcpy(arg2, p + 1);
+    sscanf(arg1, "n1=%d", &n1);
+    sscanf(arg2, "n2=%d", &n2);
 
     /**
      * atoi는 정수로 변환할 수 없는 값을 인자로 받았을 땐 0을 리턴하기 때문에
